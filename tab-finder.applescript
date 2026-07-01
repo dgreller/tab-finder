@@ -290,6 +290,8 @@ end buildAndShow
 on jumpTo(theBrowser, wi, ti)
 	if theBrowser is "Chrome" then
 		tell application "Google Chrome"
+			-- un-minimize the window (Chrome uses 'minimized'); needs only Automation perm
+			set minimized of window wi to false
 			set active tab index of window wi to ti
 			set index of window wi to 1
 			activate
@@ -297,6 +299,8 @@ on jumpTo(theBrowser, wi, ti)
 	else
 		tell application "Safari"
 			set targetWindow to window wi
+			-- un-minimize the window (Safari uses 'miniaturized')
+			set miniaturized of targetWindow to false
 			set current tab of targetWindow to tab ti of targetWindow
 			set index of targetWindow to 1
 			activate
