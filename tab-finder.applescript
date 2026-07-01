@@ -1,5 +1,5 @@
 -- ============================================================
--- Tab Finder  (native AppleScriptObjC, no dependencies)
+-- Tab Finder  v1.0.1  (native AppleScriptObjC, no dependencies)
 -- A floating search window over all open Safari + Chrome tabs.
 --   * type any text -> filters live (matches title, url, browser)
 --   * up/down arrows -> move selection
@@ -61,7 +61,7 @@ on gatherTabs()
 						try
 							set u to (URL of tb) as text
 						end try
-						set end of collected to {br:"Safari", ttl:nm, ur:u, w:wi, t:ti}
+						set end of collected to {br:"Safari", ttl:nm, ur:u, w:(id of window wi), t:ti}
 					end repeat
 				end try
 			end repeat
@@ -81,7 +81,7 @@ on gatherTabs()
 						try
 							set u to (URL of tb) as text
 						end try
-						set end of collected to {br:"Chrome", ttl:nm, ur:u, w:wi, t:ti}
+						set end of collected to {br:"Chrome", ttl:nm, ur:u, w:(id of window wi), t:ti}
 					end repeat
 				end try
 			end repeat
@@ -287,22 +287,24 @@ on buildAndShow()
 end buildAndShow
 
 -- ---- jump to the chosen tab ------------------------------------------
-on jumpTo(theBrowser, wi, ti)
+-- wid is a stable window id (not a z-order index, which shifts between when the
+-- list is gathered and when the user picks). Reference the window by id so we
+-- always act on the intended window.
+on jumpTo(theBrowser, wid, ti)
 	if theBrowser is "Chrome" then
 		tell application "Google Chrome"
-			-- un-minimize the window (Chrome uses 'minimized'); needs only Automation perm
-			set minimized of window wi to false
-			set active tab index of window wi to ti
-			set index of window wi to 1
+			set theWin to (first window whose id is wid)
+			set minimized of theWin to false
+			set active tab index of theWin to ti
+			set index of theWin to 1
 			activate
 		end tell
 	else
 		tell application "Safari"
-			set targetWindow to window wi
-			-- un-minimize the window (Safari uses 'miniaturized')
-			set miniaturized of targetWindow to false
-			set current tab of targetWindow to tab ti of targetWindow
-			set index of targetWindow to 1
+			set theWin to (first window whose id is wid)
+			set miniaturized of theWin to false
+			set current tab of theWin to tab ti of theWin
+			set index of theWin to 1
 			activate
 		end tell
 	end if
